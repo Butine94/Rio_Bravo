@@ -1,0 +1,23 @@
+# Model identifier from HuggingFace
+model_name: "runwayml/stable-diffusion-v1-5"
+
+# Output directory paths
+output_path: "outputs"
+frames_path: "outputs/frames"
+
+# Image resolution settings
+resolution:
+  width: 768
+  height: 512
+
+# Generation parameters
+inference_steps: 20
+guidance_scale: 7.5
+random_seed: 42
+
+# Scene settings
+num_scenes: 4
+
+# Video compilation settings
+video_fps: 24
+scene_duration: 3.0

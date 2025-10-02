@@ -1,6 +1,19 @@
-"""Utils package for fast AI film generation"""
+from .text_processing import parse_script, extract_scenes
+from .video_tools import create_video, add_transitions
+from .file_helpers import (
+    setup_directories,
+    save_metadata,
+    load_metadata,
+    read_text_file
+)
 
-from .text import script_to_shots, load_script
-from .video import create_dirs, make_video_fast, display_images
-
-__all__ = ['script_to_shots', 'load_script', 'create_dirs', 'make_video_fast', 'display_images']
+__all__ = [
+    'parse_script',
+    'extract_scenes',
+    'create_video',
+    'add_transitions',
+    'setup_directories',
+    'save_metadata',
+    'load_metadata',
+    'read_text_file'
+]
