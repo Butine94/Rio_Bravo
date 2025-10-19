@@ -1,3 +1,3 @@
-from .diffusion import DiffusionGenerator
+from .diffusion import CinematicDiffusionModel
 
-__all__ = ['DiffusionGenerator']
+__all__ = ['CinematicDiffusionModel']

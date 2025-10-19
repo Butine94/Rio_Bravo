@@ -1,23 +1,54 @@
-# Model identifier from HuggingFace
-model_name: "runwayml/stable-diffusion-v1-5"
+# Rio Bravo Configuration - Enhanced with ControlNet and LoRA
 
-# Output directory paths
-output_path: "outputs"
-frames_path: "outputs/frames"
-
-# Image resolution settings
-resolution:
-  width: 768
+diffusion:
+  # Base model
+  base_model: "runwayml/stable-diffusion-v1-5"
+  
+  # Basic settings
+  dtype: "fp16"
+  seed: 42
+  
+  # Image settings
   height: 512
+  width: 768
+  num_inference_steps: 20
+  guidance_scale: 7.5
+  
+  # ControlNet settings
+  use_controlnet: true
+  controlnet_model: "lllyasviel/control_v11f1p_sd15_depth"
+  controlnet_scale: 0.8
+  
+  # LoRA settings
+  use_lora: true
+  lora_path: "./loras/cinematic_v1.safetensors"
+  lora_scale: 0.7
+  
+  # Style enhancements
+  style_tokens:
+    - "anamorphic lens"
+    - "film grain"
+    - "35mm photograph"
+    - "bokeh"
 
-# Generation parameters
-inference_steps: 20
-guidance_scale: 7.5
-random_seed: 42
+# Scene generation settings
+scene:
+  max_shots: 5
+  shot_types:
+    - "establishing"
+    - "wide"
+    - "medium"
+    - "close-up"
+    - "extreme close-up"
 
-# Scene settings
-num_scenes: 4
+# Output settings
+output:
+  directory: "./outputs"
+  format: "png"
+  quality: 95
 
-# Video compilation settings
-video_fps: 24
-scene_duration: 3.0
+# Script parsing
+script:
+  screenplay_path: "./data/input.txt"
+  extract_stage_directions: true
+  extract_camera_angles: true

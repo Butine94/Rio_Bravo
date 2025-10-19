@@ -1,54 +1,94 @@
 #!/usr/bin/env python3
-"""Fast image generation script"""
+"""
+Rio Bravo - Production Pipeline
+Screenplay to cinematic storyboards with ControlNet and LoRA
+"""
 
-import torch
 import yaml
-import os
-import time
-from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+import argparse
+from pathlib import Path
+from models.diffusion import CinematicDiffusionModel
+from utils.text_processing import parse_script
+from utils.io_utils import setup_directories, read_text_file, save_metadata, create_video
 
-def generate_fast():
-    """Generate images quickly"""
-    print("🚀 Fast Generation Mode")
+def main():
+    """Main pipeline execution"""
     
-    # Load config
-    with open('config.yaml') as f:
+    parser = argparse.ArgumentParser(description='Generate cinematic storyboards from screenplay')
+    parser.add_argument('--config', default='config.yaml', help='Config file path')
+    parser.add_argument('--script', default=None, help='Script file path (overrides config)')
+    parser.add_argument('--output', default=None, help='Output directory (overrides config)')
+    parser.add_argument('--num-shots', type=int, default=None, help='Number of shots')
+    parser.add_argument('--video', action='store_true', help='Create video compilation')
+    parser.add_argument('--depth-consistency', action='store_true', help='Use depth consistency')
+    args = parser.parse_args()
+    
+    print("Loading configuration...")
+    with open(args.config) as f:
         config = yaml.safe_load(f)
     
-    # Setup
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    pipe = StableDiffusionPipeline.from_pretrained(
-        config['model'],
-        dtype=torch.float16 if device == "cuda" else torch.float32
-    ).to(device)
+    script_path = args.script if args.script else config['script']['screenplay_path']
+    output_dir = args.output if args.output else config['output']['directory']
+    num_shots = args.num_shots if args.num_shots else config['scene']['max_shots']
     
-    # Optimize
-    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-    if device == "cuda":
-        pipe.enable_attention_slicing()
+    setup_directories([output_dir])
     
-    # Generate
-    prompts = [
-        "wide ocean reflecting stars, cinematic",
-        "space station floating above, dramatic lighting", 
-        "tall black silhouette, atmospheric"
-    ]
+    print(f"Reading script from {script_path}...")
+    script_text = read_text_file(script_path)
     
-    os.makedirs('outputs', exist_ok=True)
-    start = time.time()
+    if not script_text:
+        print("Error: Could not read script file")
+        return
     
-    for i, prompt in enumerate(prompts):
-        print(f"⚡ Shot {i+1}/3...")
-        img = pipe(
-            prompt,
-            num_inference_steps=config.get('steps', 8),
-            height=config.get('size', [384, 512])[0],
-            width=config.get('size', [384, 512])[1]
-        ).images[0]
+    print(f"Parsing script into {num_shots} shots...")
+    scenes = parse_script(script_text, num_scenes=num_shots)
+    
+    print(f"\nGenerated {len(scenes)} scenes:")
+    for scene in scenes:
+        print(f"  Shot {scene['id']}: {scene['shot_type']}")
+        print(f"    {scene['prompt'][:80]}...")
+    
+    print("\nInitializing diffusion model...")
+    model = CinematicDiffusionModel(config)
+    
+    print(f"\nGenerating {len(scenes)} cinematic shots...")
+    print(f"  Resolution: {config['diffusion']['width']}x{config['diffusion']['height']}")
+    print(f"  Steps: {config['diffusion']['num_inference_steps']}")
+    print(f"  ControlNet: {'Enabled' if config['diffusion']['use_controlnet'] else 'Disabled'}")
+    print(f"  LoRA: {'Enabled' if config['diffusion']['use_lora'] else 'Disabled'}")
+    print(f"  Depth Consistency: {'Enabled' if args.depth_consistency else 'Disabled'}\n")
+    
+    generated_scenes = model.generate_shots(
+        scenes, 
+        output_dir,
+        use_depth_consistency=args.depth_consistency
+    )
+    
+    metadata = {
+        'config': config,
+        'script_path': script_path,
+        'num_shots': len(generated_scenes),
+        'scenes': generated_scenes
+    }
+    save_metadata(metadata, str(Path(output_dir) / 'metadata.json'))
+    
+    print(f"\nGeneration complete!")
+    print(f"  Output: {output_dir}")
+    print(f"  Shots: {len(generated_scenes)}")
+    
+    if args.video:
+        print("\nCreating video...")
+        image_paths = [scene['image_path'] for scene in generated_scenes]
+        video_path = Path(output_dir) / 'rio_bravo_sequence.mp4'
         
-        img.save(f'outputs/shot_{i+1}.png')
+        if create_video(image_paths, str(video_path)):
+            print(f"Video: {video_path}")
+        else:
+            print("Video creation failed (requires moviepy)")
     
-    print(f"✅ Done in {time.time()-start:.1f}s")
+    model.cleanup()
+    print("\nPipeline complete!")
+
 
 if __name__ == "__main__":
-    generate_fast()
+    main()

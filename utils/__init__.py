@@ -1,19 +1,23 @@
-from .text_processing import parse_script, extract_scenes
-from .video_tools import create_video, add_transitions
-from .file_helpers import (
+from .text_processing import parse_script
+from .io_utils import (
     setup_directories,
+    read_text_file,
     save_metadata,
     load_metadata,
-    read_text_file
+    list_image_files,
+    create_video,
+    create_video_with_transitions
 )
+from .controlnet_utils import ControlNetPreprocessor
 
 __all__ = [
     'parse_script',
-    'extract_scenes',
-    'create_video',
-    'add_transitions',
     'setup_directories',
+    'read_text_file',
     'save_metadata',
     'load_metadata',
-    'read_text_file'
+    'list_image_files',
+    'create_video',
+    'create_video_with_transitions',
+    'ControlNetPreprocessor'
 ]
