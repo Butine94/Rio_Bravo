@@ -1,28 +1,10 @@
-# Python
 __pycache__/
-*.py[cod]
+.ipynb_checkpoints/
 *.pyc
 *.pyo
-
-# Jupyter
-.ipynb_checkpoints/
-.virtual_documents/
-
-# IDEs
-.vscode/
-.idea/
+*.egg-info/
 .DS_Store
-
-# Generated outputs
 outputs/
-*.png
-*.jpg
-*.mp4
-
-# Model cache
-.cache/
-models/
-
-# Virtual env
-venv/
-env/
+loras/
+*.pt
+*.safetensors
