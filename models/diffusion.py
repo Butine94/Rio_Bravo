@@ -111,7 +111,7 @@ class CinematicDiffusionModel:
         previous_depth = None
         
         for i, shot in enumerate(shots):
-            print(f"Generating shot {i+1}/{len(shots)}: {shot['type']}")
+            print(f"Generating shot {i+1}/{len(shots)}: {shot['shot_type']}")
             
             prompt = self._enhance_prompt(shot['prompt'])
             
