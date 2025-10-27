@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Generated outputs
+outputs/
+*.png
+*.jpg
+*.mp4
+
+# Model cache
+.cache/
+models/
+
+# Virtual env
+venv/
+env/
